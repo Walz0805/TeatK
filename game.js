@@ -15,6 +15,7 @@ const stick = document.getElementById('stick');
 
 const DPR = () => Math.max(1, Math.min(2, window.devicePixelRatio || 1));
 let W = 0, H = 0;
+let player = null;
 let forceLandscapeMode = false;
 function viewportSize() {
   const vv = window.visualViewport;
@@ -122,7 +123,7 @@ function createFish({kind, x, y, level = 1, isPlayer = false}) {
   };
 }
 
-let player = createFish({kind: 'tangtang', x: W * .5, y: H * .5, isPlayer: true});
+player = createFish({kind: 'tangtang', x: W * .5, y: H * .5, isPlayer: true});
 
 function resetGame() {
   time = 0;
@@ -658,8 +659,11 @@ function startGameFromButton(e) {
 }
 startBtn.addEventListener('click', startGameFromButton);
 startBtn.addEventListener('pointerup', startGameFromButton);
+startBtn.addEventListener('touchend', startGameFromButton, { passive: false });
 restartBtn.addEventListener('click', startGameFromButton);
 restartBtn.addEventListener('pointerup', startGameFromButton);
+restartBtn.addEventListener('touchend', startGameFromButton, { passive: false });
+startBtn.addEventListener('touchend', startGameFromButton, { passive: false });
 
 
 // Mobile browser gesture guards: keep the game from scrolling/zooming while using the joystick.
