@@ -91,7 +91,7 @@ const angleDiff = (a, b) => {
 };
 
 function createFish({kind, x, y, level = 1, isPlayer = false}) {
-  const radius = isPlayer ? 48 : 25 + level * 2.8;
+  const radius = isPlayer ? 36 : 18 + level * 2.1;
   const maxHp = isPlayer ? 180 : 26 + level * 15;
   return {
     kind,
@@ -136,7 +136,7 @@ function resetGame() {
   foods = [];
   particles = [];
   bubbles = [];
-  for (let i = 0; i < 2; i++) spawnEnemy(true);
+  for (let i = 0; i < 6; i++) spawnEnemy(true);
   for (let i = 0; i < 30; i++) spawnFood();
   for (let i = 0; i < 65; i++) {
     bubbles.push({x: rand(0, W), y: rand(0, H), r: rand(1, 5), s: rand(.25, 1.05), a: rand(.15, .55)});
@@ -146,7 +146,7 @@ function resetGame() {
 }
 
 function enemyTargetCount() {
-  return Math.min(2 + Math.floor(player.level / 3), 5);
+  return Math.min(6 + Math.floor(player.level / 2), 12);
 }
 
 function spawnEnemy(initial = false) {
@@ -209,7 +209,7 @@ function rewardKill(e) {
     player.maxHp += 36;
     player.hp = player.maxHp;
     player.atk += 9;
-    player.radius += 2.5;
+    player.radius += 1.5;
     player.nextExp = Math.floor(player.nextExp * 1.35 + 25);
     makeText(player.x, player.y - 90, '糖糖升级！', '#fff176');
   }
@@ -390,7 +390,7 @@ function update() {
   for (const e of enemies) tickTimers(e);
 
   if (attackHeld && player.cooldown <= 0 && player.attackTimer <= 0) tryAttack(player);
-  if (time % 260 === 0 && enemies.length < enemyTargetCount()) spawnEnemy();
+  if (time % 130 === 0 && enemies.length < enemyTargetCount()) spawnEnemy();
   if (time % 240 === 0 && foods.length < 28) spawnFood();
 
   for (const b of bubbles) {
