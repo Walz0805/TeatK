@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="screen-orientation" content="landscape" />
+  <meta name="x5-orientation" content="landscape" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>糖糖大战坑坑鱼</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="rotateTip">📱 横屏玩更爽<br><span>把手机转过来，让糖糖开咬！</span></div>
+  <div id="gameWrap">
+    <canvas id="game"></canvas>
+
+    <div class="topbar">
+      <div class="title">🐟 糖糖大战坑坑鱼</div>
+      <div class="stats">
+        <span>等级 <b id="levelText">1</b></span>
+        <span>分数 <b id="scoreText">0</b></span>
+        <span>击败 <b id="killText">0</b></span>
+      </div>
+    </div>
+
+    <div class="hpBox">
+      <div class="hpName">糖糖 HP</div>
+      <div class="hpTrack"><div id="hpFill"></div></div>
+    </div>
+
+    <div id="startPanel" class="panel">
+      <h1>糖糖大战坑坑鱼</h1>
+      <p>横屏左手摇杆移动，右手按钮张嘴咬。</p>
+      <p>不是碰到就吃，必须主动攻击命中才扣血。咬空会有短暂硬直，坑坑们会趁机反咬。</p>
+      <button id="startBtn">开始整活</button>
+      <div class="smallTip">手机端优先适配：建议横屏玩；电脑端也支持 WASD / 方向键移动，空格攻击。</div>
+    </div>
+
+    <div id="gameOverPanel" class="panel hidden">
+      <h1>糖糖被坑坑围殴了</h1>
+      <p id="finalText">分数 0</p>
+      <button id="restartBtn">重新开始</button>
+    </div>
+
+    <div id="joystick" class="joystick">
+      <div id="stick" class="stick"></div>
+    </div>
+
+    <button id="attackBtn" class="attackBtn">咬！</button>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
