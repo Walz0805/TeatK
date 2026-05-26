@@ -15,18 +15,39 @@ const stick = document.getElementById('stick');
 
 const DPR = () => Math.max(1, Math.min(2, window.devicePixelRatio || 1));
 let W = 0, H = 0;
+let forceLandscapeMode = false;
+function viewportSize() {
+  const vv = window.visualViewport;
+  return {
+    w: Math.floor(vv ? vv.width : window.innerWidth),
+    h: Math.floor(vv ? vv.height : window.innerHeight),
+  };
+}
+function isLandscape() {
+  const { w, h } = viewportSize();
+  return w >= h;
+}
 function resize() {
   const dpr = DPR();
-  const vv = window.visualViewport;
-  W = Math.floor(vv ? vv.width : window.innerWidth);
-  H = Math.floor(vv ? vv.height : window.innerHeight);
+  const { w, h } = viewportSize();
+  forceLandscapeMode = h > w;
+  W = forceLandscapeMode ? h : w;
+  H = forceLandscapeMode ? w : h;
+  document.body.classList.toggle('force-landscape', forceLandscapeMode);
+  document.documentElement.style.setProperty('--game-w', W + 'px');
+  document.documentElement.style.setProperty('--game-h', H + 'px');
   canvas.width = Math.floor(W * dpr);
   canvas.height = Math.floor(H * dpr);
   canvas.style.width = W + 'px';
   canvas.style.height = H + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (player) {
+    player.x = Math.max(player.radius + 10, Math.min(W - player.radius - 10, player.x));
+    player.y = Math.max(88 + player.radius, Math.min(H - player.radius - 10, player.y));
+  }
 }
 window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 250));
 window.visualViewport && window.visualViewport.addEventListener('resize', resize);
 resize();
 
@@ -54,7 +75,6 @@ let enemies = [];
 let foods = [];
 let bubbles = [];
 const isTouchDevice = matchMedia('(pointer: coarse)').matches;
-function isLandscape() { return window.innerWidth > window.innerHeight; }
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -570,7 +590,13 @@ function setStick(clientX, clientY) {
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
   let dx = clientX - cx, dy = clientY - cy;
-  const max = rect.width * (isLandscape() ? .42 : .38);
+  // If the whole page is forcibly rotated, convert screen drag to the game's local axes.
+  if (forceLandscapeMode) {
+    const oldDx = dx;
+    dx = dy;
+    dy = -oldDx;
+  }
+  const max = rect.width * .42;
   const len = Math.hypot(dx, dy);
   if (len > max) { dx = dx / len * max; dy = dy / len * max; }
   stick.style.transform = `translate(${dx}px, ${dy}px)`;
@@ -619,6 +645,10 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 function startGameFromButton(e) {
   if (e) e.preventDefault();
+  if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+  resize();
   resetGame();
 }
 startBtn.addEventListener('click', startGameFromButton);
