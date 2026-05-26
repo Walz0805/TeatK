@@ -23,9 +23,13 @@ function viewportSize() {
     h: Math.floor(vv ? vv.height : window.innerHeight),
   };
 }
-function isLandscape() {
+function isPhysicalLandscape() {
   const { w, h } = viewportSize();
   return w >= h;
+}
+function isLandscape() {
+  // 游戏坐标系永远按横屏处理，竖屏时只是把整个页面旋转显示。
+  return true;
 }
 function resize() {
   const dpr = DPR();
@@ -74,7 +78,7 @@ let particles = [];
 let enemies = [];
 let foods = [];
 let bubbles = [];
-const isTouchDevice = matchMedia('(pointer: coarse)').matches;
+const isTouchDevice = true; // 本版按手机触屏横屏体验设计
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -86,7 +90,7 @@ const angleDiff = (a, b) => {
 };
 
 function createFish({kind, x, y, level = 1, isPlayer = false}) {
-  const radius = isPlayer ? (isTouchDevice ? (isLandscape() ? 48 : 50) : 54) : 26 + level * 3;
+  const radius = isPlayer ? 48 : 25 + level * 2.8;
   const maxHp = isPlayer ? 180 : 26 + level * 15;
   return {
     kind,
@@ -100,7 +104,7 @@ function createFish({kind, x, y, level = 1, isPlayer = false}) {
     hp: maxHp,
     maxHp,
     atk: isPlayer ? 34 : 3 + level * 3,
-    speed: isPlayer ? (isTouchDevice ? (isLandscape() ? 2.45 : 2.65) : 2.9) : 0.30 + Math.random() * 0.16 + level * 0.03,
+    speed: isPlayer ? 2.35 : 0.28 + Math.random() * 0.14 + level * 0.025,
     isPlayer,
     attackTimer: 0,
     cooldown: 0,
@@ -170,7 +174,7 @@ function mouthPos(fish) {
 function tryAttack(fish) {
   if (fish.cooldown > 0 || fish.attackTimer > 0 || fish.stunTimer > 0 || fish.dead) return;
   fish.attackTimer = 18;
-  fish.cooldown = fish.isPlayer ? 24 : 96;
+  fish.cooldown = fish.isPlayer ? 20 : 110;
   fish.hitDone = false;
   fish.stunTimer = fish.isPlayer ? 2 : 12;
   fish.vx += Math.cos(fish.dir) * (fish.isPlayer ? 4.2 : 1.6);
@@ -184,10 +188,10 @@ function attackHit(attacker, target) {
   const dx = target.x - attacker.x;
   const dy = target.y - attacker.y;
   const d = Math.hypot(dx, dy);
-  const reach = attacker.radius * (attacker.isPlayer ? 2.15 : 1.1) + target.radius * .55;
+  const reach = attacker.radius * (attacker.isPlayer ? 2.35 : 1.0) + target.radius * .60;
   if (d > reach) return false;
   const a = Math.atan2(dy, dx);
-  return Math.abs(angleDiff(a, attacker.dir)) < Math.PI * (attacker.isPlayer ? .62 : .30);
+  return Math.abs(angleDiff(a, attacker.dir)) < Math.PI * (attacker.isPlayer ? .68 : .26);
 }
 
 function rewardKill(e) {
@@ -596,7 +600,7 @@ function setStick(clientX, clientY) {
     dx = dy;
     dy = -oldDx;
   }
-  const max = rect.width * .42;
+  const max = rect.width * .40;
   const len = Math.hypot(dx, dy);
   if (len > max) { dx = dx / len * max; dy = dy / len * max; }
   stick.style.transform = `translate(${dx}px, ${dy}px)`;
@@ -643,11 +647,12 @@ window.addEventListener('keydown', e => {
   }
 });
 window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+let lastStartTap = 0;
 function startGameFromButton(e) {
   if (e) e.preventDefault();
-  if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  }
+  const now = Date.now();
+  if (now - lastStartTap < 350) return;
+  lastStartTap = now;
   resize();
   resetGame();
 }
